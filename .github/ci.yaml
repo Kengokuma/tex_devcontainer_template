@@ -1,0 +1,89 @@
+name: Build and Release LaTeX PDFs
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            latexmk \
+            texlive-lang-japanese \
+            texlive-latex-extra \
+            texlive-luatex \
+            texlive-fonts-recommended \
+            fonts-noto-cjk \
+            ghostscript \
+            make
+
+      - name: Compile LaTeX files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t tex_files < <(
+            find . \
+              -path './.git' -prune -o \
+              -path './.github' -prune -o \
+              -path './.devcontainer' -prune -o \
+              -path '*/out' -prune -o \
+              -name '*.tex' -print | sort
+          )
+
+          if [ "${#tex_files[@]}" -eq 0 ]; then
+            echo "No TeX files found."
+            exit 0
+          fi
+
+          for tex_file in "${tex_files[@]}"; do
+            project_dir="$(dirname "$tex_file")"
+            main_file="$(basename "$tex_file")"
+            project_dir="${project_dir#./}"
+
+            if [ "$project_dir" = "." ]; then
+              make build MAIN="$main_file"
+            else
+              make build PROJECT="$project_dir" MAIN="$main_file"
+            fi
+          done
+
+      - name: Prepare release assets
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p release_assets
+
+          while IFS= read -r pdf_file; do
+            asset_name="${pdf_file#./}"
+            asset_name="${asset_name#out/}"
+            asset_name="${asset_name//\/out\//\/}"
+            asset_name="${asset_name//\//__}"
+            cp "$pdf_file" "release_assets/$asset_name"
+          done < <(find . -path '*/out/*.pdf' -print | sort)
+
+          find release_assets -type f -print
+
+      - name: Create release and upload assets
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release_assets/*.pdf
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
