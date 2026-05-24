@@ -14,4 +14,32 @@ CLI では以下でもビルドできます。
 make build
 ```
 
-生成物は `out/` に出力されます。
+リポジトリ内に複数のプロジェクトディレクトリを置く場合も、同じ devcontainer 環境でビルドできます。
+
+```text
+.
+├── .devcontainer/
+├── Makefile
+├── projects/
+│   ├── report/
+│   │   └── main.tex
+│   └── slides/
+│       └── main.tex
+└── template.tex
+```
+
+プロジェクト内の `.tex` ファイルが1つだけなら、`PROJECT` を指定します。
+
+```sh
+make build PROJECT=projects/report
+```
+
+生成物は `projects/report/out/` に出力されます。
+
+プロジェクト内に複数の `.tex` ファイルがある場合は、対象も指定します。
+
+```sh
+make build PROJECT=projects/report MAIN=your-file.tex
+```
+
+ルート直下の `.tex` をビルドする場合の生成物は `out/` に出力されます。
