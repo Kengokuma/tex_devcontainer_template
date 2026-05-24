@@ -1,1 +1,1 @@
-# tex-devcontainer-template
+# tex_devcontainer_template
