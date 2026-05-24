@@ -1,0 +1,43 @@
+{
+  "name": "tex-devcontainer-template",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "James-Yu.latex-workshop"
+      ],
+      "settings": {
+        "latex-workshop.latex.outDir": "%DIR%/out",
+        "latex-workshop.latex.recipe.default": "latexmk (LuaLaTeX)",
+        "latex-workshop.latex.recipes": [
+          {
+            "name": "latexmk (LuaLaTeX)",
+            "tools": [
+              "latexmk-lualatex"
+            ]
+          }
+        ],
+        "latex-workshop.latex.tools": [
+          {
+            "name": "latexmk-lualatex",
+            "command": "latexmk",
+            "args": [
+              "-lualatex",
+              "-synctex=1",
+              "-interaction=nonstopmode",
+              "-file-line-error",
+              "-outdir=out",
+              "%DOC%"
+            ]
+          }
+        ],
+        "latex-workshop.view.pdf.viewer": "tab",
+        "latex-workshop.latex.autoClean.run": "onBuilt"
+      }
+    }
+  }
+}
