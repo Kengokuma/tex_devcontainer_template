@@ -13,5 +13,6 @@ RUN apt-get update \
         fonts-noto-cjk \
         ghostscript \
         make \
+        gh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
