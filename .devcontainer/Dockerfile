@@ -9,6 +9,7 @@ RUN apt-get update \
         texlive-latex-extra \
         texlive-luatex \
         texlive-fonts-recommended \
+        texlive-extra-utils \
         fonts-noto-cjk \
         ghostscript \
         make \
